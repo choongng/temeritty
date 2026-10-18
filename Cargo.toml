@@ -5,6 +5,7 @@ members = [
     "alacritty_config",
     "alacritty_config_derive",
 ]
+exclude = ["vendor/glutin"]
 resolver = "2"
 
 [workspace.package]
@@ -23,3 +24,7 @@ toml_edit = "0.24.0"
 # TODO: Validation of fix for #6978. Remove before next release and use released `x11-clipboard`.
 [patch.crates-io]
 x11-clipboard = { git = "https://github.com/quininer/x11-clipboard.git", rev = "19ab2163cf0bd0db607e827a5214571990307866" }
+
+# EGL on macOS, for ANGLE; see vendor/glutin/PATCHES.md.
+glutin = { path = "vendor/glutin" }
+glutin_egl_sys = { path = "vendor/glutin_egl_sys" }
