@@ -28,6 +28,7 @@ APP_FRAMEWORKS_DIR = $(APP_DIR)/$(APP_NAME)/Contents/Frameworks
 ANGLE_DIR = target/angle
 
 DMG_NAME = $(BRAND).dmg
+APPS_DIR ?= /Applications
 DMG_DIR = $(RELEASE_DIR)/osx
 
 vpath $(TARGET) $(RELEASE_DIR)
@@ -82,6 +83,12 @@ $(APP_NAME)-%: $(TARGET)-% angle-%
 	@codesign --force --deep --sign - "$(APP_DIR)/$(APP_NAME)"
 	@echo "Created '$(APP_NAME)' in '$(APP_DIR)'"
 
+app-install: $(APP_NAME)-native ## Install the app in APPS_DIR (/Applications)
+	@rm -rf "$(APPS_DIR)/$(APP_NAME)"
+	@ditto "$(APP_DIR)/$(APP_NAME)" "$(APPS_DIR)/$(APP_NAME)"
+	@xattr -dr com.apple.quarantine "$(APPS_DIR)/$(APP_NAME)" 2>/dev/null || true
+	@echo "Installed '$(APP_NAME)' in '$(APPS_DIR)'"
+
 dmg: $(DMG_NAME)-native ## Create a disk image
 dmg-universal: $(DMG_NAME)-universal ## Create a universal disk image
 $(DMG_NAME)-%: $(APP_NAME)-%
@@ -99,7 +106,7 @@ install-universal: $(INSTALL)-native ## Mount universal disk image
 $(INSTALL)-%: $(DMG_NAME)-%
 	@open $(DMG_DIR)/$(DMG_NAME)
 
-.PHONY: angle angle-native angle-universal app binary clean dmg install $(TARGET) $(TARGET)-universal
+.PHONY: angle angle-native angle-universal app app-install binary clean dmg install $(TARGET) $(TARGET)-universal
 
 clean: ## Remove all build artifacts
 	@cargo clean
