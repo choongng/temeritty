@@ -4,9 +4,10 @@ This is glutin 0.32.3 from crates.io (sha256
 `12124de845cacfebedff80e877bb37b5b75c34c5a4c89e47e1cdd67fb6041325`), used
 through `[patch.crates-io]` in the workspace `Cargo.toml`. The crates.io
 `.cargo-ok` marker is removed; everything else is as published except for
-the three changes below. Each is marked `Temeritty patch` in the source. The
+the four changes below. Each is marked `Temeritty patch` in the source. The
 first two are additions: no existing behaviour changes unless they are
-called. The third adds the EGL backend to macOS builds.
+called. The third adds the EGL backend to macOS builds. The fourth puts CGL
+behind a default feature.
 
 ## 1. Load EGL from a given path
 
@@ -61,6 +62,17 @@ vendored too, in `vendor/glutin_egl_sys` with its own `[patch.crates-io]`
 entry; `vendor/glutin_egl_sys/PATCHES.md` has its two-line change.
 
 See `extra/osx/ANGLE.md` for how Temeritty builds and bundles ANGLE.
+
+## 4. CGL behind a `cgl` feature
+
+- `Cargo.toml`: a `cgl` feature, in `default`, enables the now optional
+  `cgl` dependency.
+- `build.rs`: `cgl_backend` requires the feature.
+
+Why: the `cgl` crate links `OpenGL.framework`. Temeritty draws only through
+ANGLE's Metal backend and builds glutin with `default-features = false`, so
+its binary links no OpenGL framework at all. With default features glutin
+builds CGL as before.
 
 ## Rebasing
 

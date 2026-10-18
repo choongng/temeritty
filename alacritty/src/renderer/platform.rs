@@ -1,12 +1,15 @@
 //! The graphics platform that is used by the renderer.
 
+use std::error::Error;
 use std::num::NonZeroU32;
 
 use glutin::config::{ColorBufferType, Config, ConfigTemplateBuilder, GetGlConfig};
 use glutin::context::{
     ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, Robustness, Version,
 };
-use glutin::display::{Display, DisplayApiPreference, DisplayFeatures, GetGlDisplay};
+#[cfg(not(target_os = "macos"))]
+use glutin::display::DisplayApiPreference;
+use glutin::display::{Display, DisplayFeatures, GetGlDisplay};
 use glutin::error::Result as GlutinResult;
 use glutin::prelude::*;
 use glutin::surface::{Surface, SurfaceAttributesBuilder, WindowSurface};
@@ -17,14 +20,17 @@ use winit::dpi::PhysicalSize;
 use winit::platform::x11;
 use winit::raw_window_handle::{RawDisplayHandle, RawWindowHandle};
 
-/// Create the GL display.
+#[cfg(target_os = "macos")]
+use crate::renderer::angle;
+
+/// Create the GL display: ANGLE on macOS, the native driver elsewhere.
 pub fn create_gl_display(
     raw_display_handle: RawDisplayHandle,
     _raw_window_handle: Option<RawWindowHandle>,
     _prefer_egl: bool,
-) -> GlutinResult<Display> {
+) -> Result<Display, Box<dyn Error>> {
     #[cfg(target_os = "macos")]
-    let preference = DisplayApiPreference::Cgl;
+    let display = angle::create_display(raw_display_handle)?;
 
     #[cfg(windows)]
     let preference = if _prefer_egl {
@@ -43,7 +49,9 @@ pub fn create_gl_display(
     #[cfg(all(not(feature = "x11"), not(any(target_os = "macos", windows))))]
     let preference = DisplayApiPreference::Egl;
 
+    #[cfg(not(target_os = "macos"))]
     let display = unsafe { Display::new(raw_display_handle, preference)? };
+
     log::info!("Using {}", { display.version_string() });
     Ok(display)
 }
@@ -111,6 +119,11 @@ pub fn create_gl_context(
 ) -> GlutinResult<NotCurrentContext> {
     let debug = log::max_level() >= LevelFilter::Debug;
 
+    // ANGLE gives OpenGL ES only.
+    #[cfg(target_os = "macos")]
+    let apis = [(ContextApi::Gles(Some(Version::new(2, 0))), GlProfile::Core)];
+
+    #[cfg(not(target_os = "macos"))]
     let apis = [
         (ContextApi::OpenGl(Some(Version::new(3, 3))), GlProfile::Core),
         // Try gles before OpenGL 2.1 as it tends to be more stable.

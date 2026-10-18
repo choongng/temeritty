@@ -49,6 +49,7 @@ dependencies = [
  "glutin",
  "home",
  "libc",
+ "libloading",
  "log",
  "notify",
  "objc2 0.6.3",
@@ -325,15 +326,6 @@ name = "cfg_aliases"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
-
-[[package]]
-name = "cgl"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ced0551234e87afee12411d535648dd89d2e7f34c78b753395567aff3d447ff"
-dependencies = [
- "libc",
-]
 
 [[package]]
 name = "clap"
@@ -797,7 +789,6 @@ version = "0.32.3"
 dependencies = [
  "bitflags 2.9.4",
  "cfg_aliases",
- "cgl",
  "dispatch2",
  "glutin_egl_sys",
  "glutin_glx_sys",

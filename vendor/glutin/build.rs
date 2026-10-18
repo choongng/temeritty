@@ -21,6 +21,7 @@ fn main() {
         egl_backend: { all(feature = "egl", any(windows, unix), not(ios_platform), not(wasm_platform)) },
         glx_backend: { all(feature = "glx", x11_platform, not(wasm_platform)) },
         wgl_backend: { all(feature = "wgl", windows, not(wasm_platform)) },
-        cgl_backend: { all(macos_platform, not(wasm_platform)) },
+        // Temeritty patch: behind the `cgl` feature, a default one; upstream has no feature.
+        cgl_backend: { all(feature = "cgl", macos_platform, not(wasm_platform)) },
     }
 }

@@ -49,12 +49,15 @@ targets = [
 
 [features]
 default = [
+    "cgl",
     "egl",
     "glx",
     "x11",
     "wayland",
     "wgl",
 ]
+# Temeritty patch: CGL, and the OpenGL framework it links, behind a feature.
+cgl = ["dep:cgl"]
 egl = [
     "glutin_egl_sys",
     "libloading",
@@ -118,6 +121,7 @@ optional = true
 
 [target.'cfg(any(target_os = "macos"))'.dependencies.cgl]
 version = "0.3.2"
+optional = true
 
 [target.'cfg(any(target_os = "macos"))'.dependencies.dispatch2]
 version = "0.3.0"

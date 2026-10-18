@@ -20,6 +20,9 @@ APP_BINARY = $(RELEASE_DIR)/$(TARGET)
 APP_BINARY_DIR = $(APP_DIR)/$(APP_NAME)/Contents/MacOS
 APP_EXTRAS_DIR = $(APP_DIR)/$(APP_NAME)/Contents/Resources
 APP_COMPLETIONS_DIR = $(APP_EXTRAS_DIR)/completions
+APP_FRAMEWORKS_DIR = $(APP_DIR)/$(APP_NAME)/Contents/Frameworks
+# Built by extra/osx/build-angle.sh.
+ANGLE_DIR = target/angle
 
 DMG_NAME = Alacritty.dmg
 DMG_DIR = $(RELEASE_DIR)/osx
@@ -42,12 +45,22 @@ $(TARGET)-universal:
 	MACOSX_DEPLOYMENT_TARGET="10.12" cargo build --release --target=aarch64-apple-darwin
 	@lipo target/{x86_64,aarch64}-apple-darwin/release/$(TARGET) -create -output $(APP_BINARY)
 
+angle: angle-native ## Build ANGLE for cargo run
+	@mkdir -p target/debug $(RELEASE_DIR)
+	@cp -f $(ANGLE_DIR)/native/*.dylib target/debug
+	@cp -f $(ANGLE_DIR)/native/*.dylib $(RELEASE_DIR)
+angle-native:
+	@sh $(ASSETS_DIR)/osx/build-angle.sh $(ANGLE_DIR)/native
+angle-universal:
+	@sh $(ASSETS_DIR)/osx/build-angle.sh $(ANGLE_DIR)/universal arm64 x64
+
 app: $(APP_NAME)-native ## Create an Alacritty.app
 app-universal: $(APP_NAME)-universal ## Create a universal Alacritty.app
-$(APP_NAME)-%: $(TARGET)-%
+$(APP_NAME)-%: $(TARGET)-% angle-%
 	@mkdir -p $(APP_BINARY_DIR)
 	@mkdir -p $(APP_EXTRAS_DIR)
 	@mkdir -p $(APP_COMPLETIONS_DIR)
+	@mkdir -p $(APP_FRAMEWORKS_DIR)
 	@scdoc < $(MANPAGE) | gzip -c > $(APP_EXTRAS_DIR)/alacritty.1.gz
 	@scdoc < $(MANPAGE-MSG) | gzip -c > $(APP_EXTRAS_DIR)/alacritty-msg.1.gz
 	@scdoc < $(MANPAGE-CONFIG) | gzip -c > $(APP_EXTRAS_DIR)/alacritty.5.gz
@@ -57,6 +70,8 @@ $(APP_NAME)-%: $(TARGET)-%
 	@cp -fRp $(APP_TEMPLATE) $(APP_DIR)
 	@cp -fp $(APP_BINARY) $(APP_BINARY_DIR)
 	@cp -fp $(COMPLETIONS) $(APP_COMPLETIONS_DIR)
+	@cp -fp $(ANGLE_DIR)/$*/libEGL.dylib $(ANGLE_DIR)/$*/libGLESv2.dylib $(APP_FRAMEWORKS_DIR)
+	@cp -fp $(ANGLE_DIR)/$*/THIRD-PARTY-NOTICES.txt $(APP_EXTRAS_DIR)
 	@touch -r "$(APP_BINARY)" "$(APP_DIR)/$(APP_NAME)"
 	@codesign --remove-signature "$(APP_DIR)/$(APP_NAME)"
 	@codesign --force --deep --sign - "$(APP_DIR)/$(APP_NAME)"
@@ -79,7 +94,7 @@ install-universal: $(INSTALL)-native ## Mount universal disk image
 $(INSTALL)-%: $(DMG_NAME)-%
 	@open $(DMG_DIR)/$(DMG_NAME)
 
-.PHONY: app binary clean dmg install $(TARGET) $(TARGET)-universal
+.PHONY: angle angle-native angle-universal app binary clean dmg install $(TARGET) $(TARGET)-universal
 
 clean: ## Remove all build artifacts
 	@cargo clean

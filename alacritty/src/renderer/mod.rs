@@ -23,6 +23,8 @@ use crate::gl;
 use crate::renderer::rects::{RectRenderer, RenderRect};
 use crate::renderer::shader::ShaderError;
 
+#[cfg(target_os = "macos")]
+mod angle;
 pub mod platform;
 pub mod rects;
 mod shader;

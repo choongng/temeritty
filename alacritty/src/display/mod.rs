@@ -509,9 +509,14 @@ impl Display {
         let mut damage_tracker = DamageTracker::new(size_info.screen_lines(), size_info.columns());
         damage_tracker.debug = config.debug.highlight_damage;
 
-        // Disable vsync.
-        if let Err(err) = surface.set_swap_interval(&context, SwapInterval::DontWait) {
-            info!("Failed to disable vsync: {err}");
+        // Disable vsync, except on macOS, where ANGLE's Metal then tears other windows.
+        let interval = if cfg!(target_os = "macos") {
+            SwapInterval::Wait(NonZeroU32::new(1).unwrap())
+        } else {
+            SwapInterval::DontWait
+        };
+        if let Err(err) = surface.set_swap_interval(&context, interval) {
+            info!("Failed to set the swap interval: {err}");
         }
 
         Ok(Self {
