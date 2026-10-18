@@ -5,13 +5,13 @@
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleExecutable</key>
-  <string>alacritty</string>
+  <string>Temeritty</string>
   <key>CFBundleIdentifier</key>
-  <string>org.alacritty</string>
+  <string>net.fastfin.temeritty</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Alacritty</string>
+  <string>Temeritty</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
@@ -24,6 +24,8 @@
   <string>1</string>
   <key>CFBundleIconFile</key>
   <string>alacritty.icns</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>13.0</string>
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>NSMainNibFile</key>
@@ -31,34 +33,34 @@
   <key>NSSupportsAutomaticGraphicsSwitching</key>
   <true/>
   <key>CFBundleDisplayName</key>
-  <string>Alacritty</string>
+  <string>Temeritty</string>
   <key>NSRequiresAquaSystemAppearance</key>
   <string>NO</string>
     <key>com.apple.security.automation.apple-events</key>
     <true/>
     <key>NSAppleEventsUsageDescription</key>
-    <string>An application in Alacritty would like to access AppleScript.</string>
+    <string>An application in Temeritty would like to access AppleScript.</string>
     <key>NSCalendarsUsageDescription</key>
-    <string>An application in Alacritty would like to access calendar data.</string>
+    <string>An application in Temeritty would like to access calendar data.</string>
     <key>NSCameraUsageDescription</key>
-    <string>An application in Alacritty would like to access the camera.</string>
+    <string>An application in Temeritty would like to access the camera.</string>
     <key>NSContactsUsageDescription</key>
-    <string>An application in Alacritty wants to access your contacts.</string>
+    <string>An application in Temeritty wants to access your contacts.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>An application in Alacritty would like to access your location information, even in the background.</string>
+    <string>An application in Temeritty would like to access your location information, even in the background.</string>
     <key>NSLocationUsageDescription</key>
-    <string>An application in Alacritty would like to access your location information.</string>
+    <string>An application in Temeritty would like to access your location information.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>An application in Alacritty would like to access your location information while active.</string>
+    <string>An application in Temeritty would like to access your location information while active.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>An application in Alacritty would like to access your microphone.</string>
+    <string>An application in Temeritty would like to access your microphone.</string>
     <key>NSRemindersUsageDescription</key>
-    <string>An application in Alacritty would like to access your reminders.</string>
+    <string>An application in Temeritty would like to access your reminders.</string>
     <key>NSSystemAdministrationUsageDescription</key>
-    <string>An application in Alacritty requires elevated permissions.</string>
+    <string>An application in Temeritty requires elevated permissions.</string>
     <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>An application in Alacritty wants to use Bluetooth.</string>
+    <string>An application in Temeritty wants to use Bluetooth.</string>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>An application in Alacritty wants to access the local network.</string>
+    <string>An application in Temeritty wants to access the local network.</string>
 </dict>
 </plist>

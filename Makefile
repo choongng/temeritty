@@ -13,8 +13,11 @@ COMPLETIONS = $(COMPLETIONS_DIR)/_alacritty \
 	$(COMPLETIONS_DIR)/alacritty.bash \
 	$(COMPLETIONS_DIR)/alacritty.fish
 
-APP_NAME = Alacritty.app
-APP_TEMPLATE = $(ASSETS_DIR)/osx/$(APP_NAME)
+# App name; the binary gets it as BRAND_NAME.
+BRAND ?= Temeritty
+APP_NAME = $(BRAND).app
+BUNDLE_ID ?= net.fastfin.temeritty
+APP_TEMPLATE = $(ASSETS_DIR)/osx/Temeritty.app
 APP_DIR = $(RELEASE_DIR)/osx
 APP_BINARY = $(RELEASE_DIR)/$(TARGET)
 APP_BINARY_DIR = $(APP_DIR)/$(APP_NAME)/Contents/MacOS
@@ -24,7 +27,7 @@ APP_FRAMEWORKS_DIR = $(APP_DIR)/$(APP_NAME)/Contents/Frameworks
 # Built by extra/osx/build-angle.sh.
 ANGLE_DIR = target/angle
 
-DMG_NAME = Alacritty.dmg
+DMG_NAME = $(BRAND).dmg
 DMG_DIR = $(RELEASE_DIR)/osx
 
 vpath $(TARGET) $(RELEASE_DIR)
@@ -39,10 +42,10 @@ help: ## Print this help message
 binary: $(TARGET)-native ## Build a release binary
 binary-universal: $(TARGET)-universal ## Build a universal release binary
 $(TARGET)-native:
-	MACOSX_DEPLOYMENT_TARGET="10.12" cargo build --release
+	BRAND_NAME="$(BRAND)" MACOSX_DEPLOYMENT_TARGET="13.0" cargo build --release
 $(TARGET)-universal:
-	MACOSX_DEPLOYMENT_TARGET="10.12" cargo build --release --target=x86_64-apple-darwin
-	MACOSX_DEPLOYMENT_TARGET="10.12" cargo build --release --target=aarch64-apple-darwin
+	BRAND_NAME="$(BRAND)" MACOSX_DEPLOYMENT_TARGET="13.0" cargo build --release --target=x86_64-apple-darwin
+	BRAND_NAME="$(BRAND)" MACOSX_DEPLOYMENT_TARGET="13.0" cargo build --release --target=aarch64-apple-darwin
 	@lipo target/{x86_64,aarch64}-apple-darwin/release/$(TARGET) -create -output $(APP_BINARY)
 
 angle: angle-native ## Build ANGLE for cargo run
@@ -54,8 +57,8 @@ angle-native:
 angle-universal:
 	@sh $(ASSETS_DIR)/osx/build-angle.sh $(ANGLE_DIR)/universal arm64 x64
 
-app: $(APP_NAME)-native ## Create an Alacritty.app
-app-universal: $(APP_NAME)-universal ## Create a universal Alacritty.app
+app: $(APP_NAME)-native ## Create the app
+app-universal: $(APP_NAME)-universal ## Create a universal app
 $(APP_NAME)-%: $(TARGET)-% angle-%
 	@mkdir -p $(APP_BINARY_DIR)
 	@mkdir -p $(APP_EXTRAS_DIR)
@@ -67,8 +70,10 @@ $(APP_NAME)-%: $(TARGET)-% angle-%
 	@scdoc < $(MANPAGE-CONFIG-BINDINGS) | gzip -c > $(APP_EXTRAS_DIR)/alacritty-bindings.5.gz
 	@scdoc < $(MANPAGE-ESCAPES) | gzip -c > $(APP_EXTRAS_DIR)/alacritty-escapes.7.gz
 	@tic -xe alacritty,alacritty-direct -o $(APP_EXTRAS_DIR) $(TERMINFO)
-	@cp -fRp $(APP_TEMPLATE) $(APP_DIR)
-	@cp -fp $(APP_BINARY) $(APP_BINARY_DIR)
+	@cp -fRp $(APP_TEMPLATE)/Contents $(APP_DIR)/$(APP_NAME)
+	@cp -fp $(APP_BINARY) "$(APP_BINARY_DIR)/$(BRAND)"
+	@sed -i '' 's/Temeritty/$(BRAND)/g' "$(APP_DIR)/$(APP_NAME)/Contents/Info.plist"
+	@plutil -replace CFBundleIdentifier -string "$(BUNDLE_ID)" "$(APP_DIR)/$(APP_NAME)/Contents/Info.plist"
 	@cp -fp $(COMPLETIONS) $(APP_COMPLETIONS_DIR)
 	@cp -fp $(ANGLE_DIR)/$*/libEGL.dylib $(ANGLE_DIR)/$*/libGLESv2.dylib $(APP_FRAMEWORKS_DIR)
 	@cp -fp $(ANGLE_DIR)/$*/THIRD-PARTY-NOTICES.txt $(APP_EXTRAS_DIR)
@@ -77,13 +82,13 @@ $(APP_NAME)-%: $(TARGET)-% angle-%
 	@codesign --force --deep --sign - "$(APP_DIR)/$(APP_NAME)"
 	@echo "Created '$(APP_NAME)' in '$(APP_DIR)'"
 
-dmg: $(DMG_NAME)-native ## Create an Alacritty.dmg
-dmg-universal: $(DMG_NAME)-universal ## Create a universal Alacritty.dmg
+dmg: $(DMG_NAME)-native ## Create a disk image
+dmg-universal: $(DMG_NAME)-universal ## Create a universal disk image
 $(DMG_NAME)-%: $(APP_NAME)-%
 	@echo "Packing disk image..."
 	@ln -sf /Applications $(DMG_DIR)/Applications
 	@hdiutil create $(DMG_DIR)/$(DMG_NAME) \
-		-volname "Alacritty" \
+		-volname "$(BRAND)" \
 		-fs HFS+ \
 		-srcfolder $(APP_DIR) \
 		-ov -format UDZO

@@ -11,6 +11,8 @@ use glutin::display::Display;
 use log::info;
 use winit::raw_window_handle::RawDisplayHandle;
 
+use crate::config::window::DEFAULT_NAME;
+
 const LIB_EGL: &str = "libEGL.dylib";
 
 /// Opened by libEGL from its own directory.
@@ -51,7 +53,7 @@ pub fn create_display(raw_display_handle: RawDisplayHandle) -> Result<Display, A
         let tried: Vec<_> =
             dirs.iter().map(|dir| dir.join(LIB_EGL).display().to_string()).collect();
         return Err(AngleError(format!(
-            "no {}; build ANGLE with `make angle` or run Temeritty.app",
+            "no {}; build ANGLE with `make angle` or run {DEFAULT_NAME}.app",
             tried.join(" or ")
         )));
     };

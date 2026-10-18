@@ -16,6 +16,7 @@ use log::{Level, LevelFilter};
 use winit::event_loop::EventLoopProxy;
 
 use crate::cli::Options;
+use crate::config::window::DEFAULT_NAME;
 use crate::event::{Event, EventType};
 use crate::message_bar::{Message, MessageType};
 
@@ -198,7 +199,7 @@ struct OnDemandLogFile {
 impl OnDemandLogFile {
     fn new() -> Self {
         let mut path = env::temp_dir();
-        path.push(format!("Alacritty-{}.log", process::id()));
+        path.push(format!("{DEFAULT_NAME}-{}.log", process::id()));
 
         // Set log path as an environment variable.
         unsafe { env::set_var(ALACRITTY_LOG_ENV, path.as_os_str()) };

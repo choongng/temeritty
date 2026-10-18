@@ -13,8 +13,11 @@ use alacritty_config_derive::{ConfigDeserialize, SerdeReplace};
 use crate::config::LOG_TARGET_CONFIG;
 use crate::config::ui_config::{Delta, Percentage};
 
-/// Default Alacritty name, used for window title and class.
-pub const DEFAULT_NAME: &str = "Alacritty";
+/// App name, for window title and class, IPC socket and log file. Set by `BRAND_NAME` at build.
+pub const DEFAULT_NAME: &str = match option_env!("BRAND_NAME") {
+    Some(name) => name,
+    None => "Temeritty",
+};
 
 #[derive(ConfigDeserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct WindowConfig {

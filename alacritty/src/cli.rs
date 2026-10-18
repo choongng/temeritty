@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::sync::LazyLock;
 
 use alacritty_config::SerdeReplace;
 use clap::{ArgAction, Args, Parser, Subcommand, ValueHint};
@@ -14,12 +15,19 @@ use alacritty_terminal::tty::Options as PtyOptions;
 
 use crate::config::UiConfig;
 use crate::config::ui_config::Program;
-use crate::config::window::{Class, Identity};
+use crate::config::window::{Class, DEFAULT_NAME, Identity};
 use crate::logging::LOG_TARGET_IPC_CONFIG;
+
+/// `--title` and `--class` help, with the build-time default.
+static TITLE_HELP: LazyLock<String> =
+    LazyLock::new(|| format!("Defines the window title [default: {DEFAULT_NAME}]"));
+static CLASS_HELP: LazyLock<String> = LazyLock::new(|| {
+    format!("Defines window class/app_id on X11/Wayland [default: {DEFAULT_NAME}]")
+});
 
 /// CLI options for the main Alacritty executable.
 #[derive(Parser, Default, Debug)]
-#[clap(author, about, version = env!("VERSION"))]
+#[clap(name = DEFAULT_NAME, author, about, version = env!("VERSION"))]
 pub struct Options {
     /// Print all events to STDOUT.
     #[clap(long)]
@@ -29,7 +37,7 @@ pub struct Options {
     #[clap(long, conflicts_with("daemon"))]
     pub ref_test: bool,
 
-    /// X11 window ID to embed Alacritty within (decimal or hexadecimal with "0x" prefix).
+    /// X11 window ID to embed the terminal within (decimal or hexadecimal with "0x" prefix).
     #[clap(long)]
     pub embed: Option<String>,
 
@@ -209,12 +217,17 @@ impl From<TerminalOptions> for PtyOptions {
 /// Window specific cli options which can be passed to new windows via IPC.
 #[derive(Serialize, Deserialize, Args, Default, Debug, Clone, PartialEq, Eq)]
 pub struct WindowIdentity {
-    /// Defines the window title [default: Alacritty].
-    #[clap(short = 'T', short_alias('t'), long)]
+    /// Defines the window title [default: the app's name].
+    #[clap(short = 'T', short_alias('t'), long, help = TITLE_HELP.as_str())]
     pub title: Option<String>,
 
-    /// Defines window class/app_id on X11/Wayland [default: Alacritty].
-    #[clap(long, value_name = "general> | <general>,<instance", value_parser = parse_class)]
+    /// Defines window class/app_id on X11/Wayland [default: the app's name].
+    #[clap(
+        long,
+        value_name = "general> | <general>,<instance",
+        value_parser = parse_class,
+        help = CLASS_HELP.as_str()
+    )]
     pub class: Option<Class>,
 }
 
@@ -238,7 +251,7 @@ pub enum Subcommands {
     Migrate(MigrateOptions),
 }
 
-/// Send a message to the Alacritty socket.
+/// Send a message to a running instance, through its IPC socket.
 #[cfg(unix)]
 #[derive(Args, Debug)]
 pub struct MessageOptions {
@@ -255,13 +268,13 @@ pub struct MessageOptions {
 #[cfg(unix)]
 #[derive(Subcommand, Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum SocketMessage {
-    /// Create a new window in the same Alacritty process.
+    /// Create a new window in the same process.
     CreateWindow(WindowOptions),
 
-    /// Update the Alacritty configuration.
+    /// Update the running configuration.
     Config(IpcConfig),
 
-    /// Read runtime Alacritty configuration.
+    /// Read the running configuration.
     GetConfig(IpcGetConfig),
 }
 

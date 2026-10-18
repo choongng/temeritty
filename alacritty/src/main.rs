@@ -134,6 +134,9 @@ impl Drop for TemporaryFiles {
 /// Creates a window, the terminal state, PTY, I/O event loop, input processor,
 /// config change monitor, and runs the main display loop.
 fn alacritty(mut options: Options) -> Result<(), Box<dyn Error>> {
+    #[cfg(target_os = "macos")]
+    macos::set_process_name();
+
     // Setup winit event loop.
     let window_event_loop = EventLoop::<Event>::with_user_event().build()?;
 
@@ -141,7 +144,7 @@ fn alacritty(mut options: Options) -> Result<(), Box<dyn Error>> {
     let log_file = logging::initialize(&options, window_event_loop.create_proxy())
         .expect("Unable to initialize logger");
 
-    info!("Welcome to Alacritty");
+    info!("Welcome to {}", config::window::DEFAULT_NAME);
     info!("Version {}", env!("VERSION"));
 
     #[cfg(all(feature = "x11", not(any(target_os = "macos", windows))))]

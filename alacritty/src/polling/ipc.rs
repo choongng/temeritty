@@ -15,6 +15,7 @@ use winit::event_loop::EventLoopProxy;
 use winit::window::WindowId;
 
 use crate::cli::{Options, SocketMessage};
+use crate::config::window::DEFAULT_NAME;
 use crate::event::{Event, EventType};
 
 /// Environment variable name for the IPC socket path.
@@ -222,13 +223,13 @@ fn find_socket(socket_path: Option<PathBuf>) -> IoResult<UnixStream> {
 #[cfg(not(target_os = "macos"))]
 pub fn socket_prefix() -> String {
     let display = env::var("WAYLAND_DISPLAY").or_else(|_| env::var("DISPLAY")).unwrap_or_default();
-    format!("Alacritty-{}", display.replace('/', "-"))
+    format!("{DEFAULT_NAME}-{}", display.replace('/', "-"))
 }
 
 /// File prefix matching all available sockets.
 #[cfg(target_os = "macos")]
 pub fn socket_prefix() -> String {
-    String::from("Alacritty")
+    String::from(DEFAULT_NAME)
 }
 
 /// IPC socket replies.

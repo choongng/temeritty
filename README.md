@@ -1,15 +1,17 @@
-<p align="center">
-    <img width="200" alt="Alacritty Logo" src="https://raw.githubusercontent.com/alacritty/alacritty/master/extra/logo/compat/alacritty-term%2Bscanlines.png">
-</p>
+## About Temeritty
 
-<h1 align="center">Alacritty - A fast, cross-platform, OpenGL terminal emulator</h1>
+Temeritty is a fork of Alacritty carrying two downstream quality of life changes:
 
-<p align="center">
-  <img alt="Alacritty - A fast, cross-platform, OpenGL terminal emulator"
-       src="https://raw.githubusercontent.com/alacritty/alacritty/master/extra/promo/alacritty-readme.png">
-</p>
+- Mac: Use Metal via ANGLE, working around non-working OpenGL on some recent versions of macOS including 15.8.2 (24H225).
+- Mac: List open windows in the dock menu (cherry pick Alacritty [8790](https://github.com/alacritty/alacritty/pull/8790))
 
-## About
+Please report any issues related to downstream changes to the tracker on this repo.
+
+*Original README below*
+
+---
+
+## About Alacritty
 
 Alacritty is a modern terminal emulator that comes with sensible defaults, but
 allows for extensive [configuration](#configuration). By integrating with other
